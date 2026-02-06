@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comunidades - Protocolo Leviatham</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Variables de Color */
+        :root {
+            --purple-color: #bb00ff; /* Morado Hacking */
+            --fire-color: #ff8c00;   /* Naranja/Fuego para destacar */
+            --gold-color: #ffd700;   /* Oro para Roles VIP */
+            --dark-bg: #111;
+            --mid-bg: #1e1e1e;
+        }
+
+        /* Estilos Base y Tipografía */
+        body {
+            background-color: var(--dark-bg);
+            color: #fff;
+            font-family: 'Roboto Mono', monospace;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* --- Lluvia de Código (Matrix) --- */
+        .matrix-rain-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        /* --- Contenido Principal y Header --- */
+        .container {
+            position: relative;
+            z-index: 1;
+            padding: 20px;
+            text-align: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header h1 {
+            color: var(--purple-color);
+            text-shadow: 0 0 10px var(--purple-color);
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        header p {
+            font-size: 1.1em;
+            margin-bottom: 40px;
+        }
+
+        /* --- Puertas de Acceso (Botones) --- */
+        .access-gates {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 60px;
+        }
+
+        .platform-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 250px;
+            background-color: transparent;
+            color: #fff;
+            border: 2px solid var(--purple-color);
+            padding: 15px 30px;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 2px;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s;
+            z-index: 1;
+        }
+
+        .platform-button i {
+            font-size: 1.5em;
+            margin-right: 15px;
+        }
+
+        /* Efecto Hover: Brillo morado */
+        .platform-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, var(--purple-color), transparent);
+            transition: left 0.7s;
+            z-index: -1;
+        }
+
+        .platform-button:hover {
+            color: var(--dark-bg);
+            background-color: var(--purple-color);
+            box-shadow: 0 0 15px var(--purple-color), 0 0 30px var(--purple-color);
+        }
+
+        .platform-button:hover::before {
+            left: 100%;
+        }
+
+        /* --- Hall of Fame (FUEGO MEJORADO) --- */
+        .hall-of-fame {
+            margin: 50px auto;
+        }
+
+        .hall-of-fame h2 {
+            color: var(--fire-color);
+            text-shadow: 0 0 5px var(--fire-color), 0 0 15px rgba(255, 140, 0, 0.5); /* Sombra intensa */
+            margin-bottom: 30px;
+            font-size: 1.8em;
+        }
+
+        .members-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 25px;
+            padding: 20px 0;
+        }
+
+        .member-card {
+            background-color: var(--mid-bg);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        /* KEYFRAMES para la animación de fuego/brillo (MÁS INTENSO) */
+        @keyframes fireGlow {
+            0% { box-shadow: 0 0 5px var(--fire-color), 0 0 10px rgba(255, 140, 0, 0.4), 0 0 15px rgba(255, 0, 0, 0.3); }
+            50% { box-shadow: 0 0 15px var(--fire-color), 0 0 30px rgba(255, 140, 0, 0.8), 0 0 45px rgba(255, 0, 0, 0.6); }
+            100% { box-shadow: 0 0 5px var(--fire-color), 0 0 10px rgba(255, 140, 0, 0.4), 0 0 15px rgba(255, 0, 0, 0.3); }
+        }
+
+        /* Marco de "Fuego" animado para destacar */
+        .member-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 3px solid var(--fire-color);
+            border-radius: 8px;
+            /* Aplicamos la animación */
+            animation: fireGlow 1.8s infinite alternate; /* Animación más rápida */
+            pointer-events: none;
+            opacity: 0.9;
+        }
+
+        .member-photo {
+            width: 100px;
+            height: 100px;
+            overflow: hidden;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            border: 3px solid #fff;
+            box-shadow: 0 0 5px var(--purple-color);
+        }
+
+        .member-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .member-text {
+            font-size: 0.9em;
+            color: #ccc;
+            height: 6em; 
+            overflow: hidden;
+            line-height: 1.5;
+        }
+        
+        /* --- Eventos y Novedades --- */
+        .events-news {
+            margin: 80px auto;
+            text-align: left;
+            padding: 30px;
+            background-color: #222;
+            border-radius: 12px;
+            border: 2px solid var(--purple-color);
+            box-shadow: 0 0 20px rgba(187, 0, 255, 0.3);
+        }
+
+        .events-news h2 {
+            color: #00ff41;
+            text-shadow: 0 0 5px #00ff41;
+            border-bottom: 2px solid var(--purple-color);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .sections-wrapper {
+            display: flex;
+            gap: 40px;
+        }
+        
+        .calendar-section, .announcements-section {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .calendar-section h3, .announcements-section h3 {
+            color: var(--fire-color);
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        
+        .event-item {
+            margin-bottom: 20px;
+            padding: 12px;
+            border-left: 4px solid var(--purple-color);
+            background-color: var(--mid-bg);
+            border-radius: 4px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .event-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .event-date {
+            color: #00ff41;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .event-location {
+            font-size: 0.9em;
+            color: #aaa;
+        }
+
+        .announcement-item {
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: var(--mid-bg);
+            border: 1px solid #333;
+            border-top: 3px solid var(--fire-color);
+            border-radius: 6px;
+        }
+
+        .announcement-item strong {
+            color: var(--purple-color);
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .announcement-photo-container {
+            width: 100%;
+            height: **200px;** /* Agrandado a 200px */
+            overflow: hidden;
+            margin-top: 10px;
+            border-radius: 4px;
+            border: 1px solid #555;
+        }
+
+        .announcement-photo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top;
+        }
+
+        /* --- Sección de Roles (NUEVO) --- */
+        .roles-section {
+            margin: 80px auto;
+            padding: 30px;
+            background-color: #0d0d0d;
+            border: 2px solid var(--gold-color);
+            border-radius: 12px;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
+        }
+        
+        .roles-section h2 {
+            color: var(--gold-color);
+            text-shadow: 0 0 10px var(--gold-color);
+            margin-bottom: 40px;
+            font-size: 2em;
+        }
+
+        .roles-grid {
+            display: flex;
+            justify-content: space-around;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .role-card {
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            text-align: left;
+            position: relative;
+            transition: transform 0.3s;
+            overflow: hidden;
+        }
+
+        .role-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .role-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Estilo y Efecto Único para cada Rol */
+
+        /* Rol 1: Cryptographer (20 Invita) */
+        .role-1 {
+            border: 2px solid var(--purple-color);
+            box-shadow: 0 0 10px var(--purple-color);
+        }
+        .role-1 h3 { color: var(--purple-color); }
+        .role-1 h3 i { margin-right: 10px; color: #00ff41; }
+        
+        /* Rol 2: Sentinel (100 Invita) */
+        .role-2 {
+            border: 2px solid var(--fire-color);
+            box-shadow: 0 0 15px var(--fire-color);
+        }
+        .role-2 h3 { color: var(--fire-color); }
+        .role-2 h3 i { margin-right: 10px; color: var(--gold-color); }
+
+        /* Rol 3: Leviathan Elite (200 Invita) */
+        @keyframes pulseGold {
+            0% { box-shadow: 0 0 10px var(--gold-color), 0 0 20px rgba(255, 215, 0, 0.5); }
+            100% { box-shadow: 0 0 20px var(--gold-color), 0 0 40px rgba(255, 215, 0, 0.8); }
+        }
+        .role-3 {
+            border: 3px solid var(--gold-color);
+            background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+            animation: pulseGold 1.5s infinite alternate;
+        }
+        .role-3 h3 { color: var(--gold-color); text-shadow: 0 0 5px var(--gold-color); }
+        .role-3 h3 i { margin-right: 10px; font-size: 1.8em; }
+
+        .role-card ul {
+            list-style: none;
+            padding: 0;
+            font-size: 0.9em;
+        }
+
+        .role-card ul li {
+            margin-bottom: 8px;
+            border-bottom: 1px dotted #333;
+            padding-bottom: 5px;
+        }
+        
+        /* --- MEDIA QUERIES (Adaptación Móvil) --- */
+        @media (max-width: 768px) {
+            /* ... (Estilos móviles anteriores se mantienen) ... */
+            .sections-wrapper, .roles-grid {
+                flex-direction: column;
+                align-items: center;
+            }
+            .role-card {
+                width: 90%;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <canvas class="matrix-rain-canvas"></canvas>
+
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-terminal"></i> COMUNIDADES</h1>
+            <p>Protocolo Leviatham: Plataformas Centrales de Acceso</p>
+        </header>
+        
+        <section class="access-gates">
+            <a href="[ENLACE_INVITACION_DISCORD]" class="platform-button discord-button" target="_blank">
+                <i class="fab fa-discord"></i> Discord
+            </a>
+            <a href="[ENLACE_TELEGRAM_PRINCIPAL]" class="platform-button telegram-button" target="_blank">
+                <i class="fab fa-telegram-plane"></i> Telegram
+            </a>
+        </section>
+
+        <hr style="border-color: #333;">
+
+        <section class="hall-of-fame">
+            <h2>🔥 Hall of Fame - Reconocimiento a Destacados</h2>
+            <div class="members-grid">
+                <div class="member-card">
+                    <div class="member-photo">
+                        <img src="miembro1.png" alt="Foto de Miembro 1">
+                    </div>
+                    <div class="member-text">
+                        **[Nombre de Usuario 1]** - Ganador del CTF "Shadow Protocol" de Q3. Código limpio y eficaz. Demostrando habilidades superiores en *reversing* binario.
+                    </div>
+                </div>
+                <div class="member-card">
+                    <div class="member-photo">
+                        <img src="miembro2.png" alt="Foto de Miembro 2">
+                    </div>
+                    <div class="member-text">
+                        **[Nombre de Usuario 2]** - Contribuyó con la herramienta Python automatizada para ofuscación de payloads y bypass de AV. Un gran aporte open source.
+                    </div>
+                </div>
+                <div class="member-card">
+                    <div class="member-photo">
+                        <img src="miembro3.png" alt="Foto de Miembro 3">
+                    </div>
+                    <div class="member-text">
+                        **[Nombre de Usuario 3]** - Miembro más activo en el foro durante el último mes. Gran soporte a novatos y mantenedor de las FAQs.
+                    </div>
+                </div>
+                <div class="member-card">
+                    <div class="member-photo">
+                        <img src="miembro4.png" alt="Foto de Miembro 4">
+                    </div>
+                    <div class="member-text">
+                        **[Nombre de Usuario 4]** - Descubrió un bug crítico RCE (Remote Code Execution) en la plataforma de entrenamiento interna. Reporte impecable.
+                    </div>
+                </div>
+                <div class="member-card">
+                    <div class="member-photo">
+                        <img src="miembro5.png" alt="Foto de Miembro 5">
+                    </div>
+                    <div class="member-text">
+                        **[Nombre de Usuario 5]** - Diseñador y administrador de la nueva infraestructura de servidores del grupo de estudio. Seguridad *hardcore* implementada.
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+
+        <hr style="border-color: #333;">
+
+        <section class="events-news">
+            <h2><i class="fas fa-microchip"></i> EVENTOS Y NOVEDADES DEL PROTOCOLO LEVIATHAM</h2>
+            <div class="sections-wrapper">
+                
+                <div class="calendar-section">
+                    <h3>Próximos Eventos <i class="fas fa-calendar-alt"></i></h3>
+                    <div class="event-item">
+                        <span class="event-date">25/11/2025 (19:00 UTC):</span> 
+                        CTF Interno - "The Root of All Evil" 
+                        <span class="event-location">(Plataforma Discord)</span>
+                    </div>
+                    <div class="event-item">
+                        <span class="event-date">02/12/2025 (20:30 UTC):</span> 
+                        Webinar: Introducción a Exploits en Web (XSS/SQLi)
+                        <span class="event-location">(Streaming Privado)</span>
+                    </div>
+                    <div class="event-item">
+                        <span class="event-date">08/12/2025 (18:00 UTC):</span> 
+                        Sesión de Estudio Grupal - Buffer Overflows
+                        <span class="event-location">(Sala de Voz Telegram)</span>
+                    </div>
+                </div>
+                
+                <div class="announcements-section">
+                    <h3>Novedades Oficiales <i class="fas fa-bullhorn"></i></h3>
+                    <div class="announcement-item">
+                        <strong>¡Lanzamiento de la versión 2.0 de PhishGuard!</strong>
+                        <p>Hemos liberado la v2.0 de nuestra herramienta interna "PhishGuard", con soporte para Python 3.10 y nuevos templates de *phishing*.</p>
+                        <div class="announcement-photo-container">
+                            <img src="noticia_phishguard.png" alt="Imagen de la nueva versión de PhishGuard">
+                        </div>
+                    </div>
+                    <div class="announcement-item">
+                        <strong>¡Damos la Bienvenida a 3 Nuevos Moderadores!</strong>
+                        <p>Damos la bienvenida a 3 nuevos *moderadores* al equipo de soporte y gestión de la comunidad. Ayúdanos a darles una cálida bienvenida.</p>
+                        <div class="announcement-photo-container">
+                            <img src="noticia_equipo.png" alt="Imagen del nuevo equipo de moderadores">
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+        
+        <hr style="border-color: #333;">
+
+        <section class="roles-section">
+            <h2>🥇 Programas de Recompensa: Roles de Élite</h2>
+            <div class="roles-grid">
+                
+                <div class="role-card role-1">
+                    <h3><i class="fas fa-code-branch"></i> CRYPTOGRAPHER</h3>
+                    <p>Requisito: **20 Invitaciones** Aceptadas a la Comunidad</p>
+                    <hr style="border-color: #333; margin: 15px 0;">
+                    <p>**Recompensas Incluidas:**</p>
+                    <ul>
+                        <li><i class="fas fa-key"></i> Acceso a **Herramientas Privadas** de la Comunidad (Scripts, utilidades)</li>
+                        <li><i class="fas fa-laptop-code"></i> Ayuda y soporte especializado para tus **Proyectos Personales**</li>
+                        <li><i class="fas fa-file-invoice"></i> Opción a tu **Mini-Web de Perfil** en el Subdominio del Protocolo</li>
+                    </ul>
+                </div>
+
+                <div class="role-card role-2">
+                    <h3><i class="fas fa-shield-alt"></i> SENTINEL</h3>
+                    <p>Requisito: **100 Invitaciones** Aceptadas a la Comunidad</p>
+                    <hr style="border-color: #333; margin: 15px 0;">
+                    <p>**Recompensas Incluidas (Acumulativas):**</p>
+                    <ul>
+                        <li><i class="fas fa-globe"></i> **Página Web** o Landing Page Personalizada (Hosting incluido)</li>
+                        <li><i class="fas fa-chalkboard-teacher"></i> **Mentoría Individualizada** (Temas a elección: Reversing, Web Hacking)</li>
+                        <li><i class="fas fa-biohazard"></i> Acceso a **Herramientas Beta** de Pentesting (Uso ético y legal bajo tu responsabilidad)</li>
+                    </ul>
+                </div>
+
+                <div class="role-card role-3">
+                    <h3><i class="fas fa-crown"></i> LEVIATHAN ELITE</h3>
+                    <p>Requisito: **200 Invitaciones** Aceptadas a la Comunidad</p>
+                    <hr style="border-color: #333; margin: 15px 0;">
+                    <p>**Recompensas Incluidas (Acumulativas y Exclusivas):**</p>
+                    <ul>
+                        <li><i class="fas fa-lock"></i> **Grupo VIP de Telegram** con Acceso Total y Contenido Exclusivo</li>
+                        <li><i class="fas fa-user-secret"></i> **Foro Privado** de Discusión Estratégica con el Liderazgo del Protocolo</li>
+                        <li><i class="fas fa-fire-extinguisher"></i> Acceso Prioritario a todas las Pruebas Beta y Recursos Secretos</li>
+                    </ul>
+                </div>
+                
+            </div>
+        </section>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
